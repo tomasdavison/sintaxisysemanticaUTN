@@ -20,4 +20,4 @@ sed 's/\./\.\n/g' breve_historia.txt | egrep '18[0-9]{2}\b|XIX'
 sed 's/^[a-zA-Zá-ú]*\b//g' breve_historia.txt
 
 # j)
-ls | grep '.*\.txt'
+ls | grep '.*\.txt' 
