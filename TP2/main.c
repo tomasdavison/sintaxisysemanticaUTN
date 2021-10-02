@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "string_aux.h"
+#include "html_aux.h"
 
 #define MAIN_MENU       0
 #define FIRST_OPTION    1
@@ -41,8 +42,9 @@ void extractData() {
     const char NAME_TOKEN[] = "link('";
     const char TD_TOKEN[] = "/td><td";
 
-    species = (specie_t *) malloc(sizeof(specie_t));
-    while (fgets(buffer, sizeof(buffer), source) != NULL) {
+    //species = (specie_t *) malloc(sizeof(specie_t));
+    char* fila = obtenerDataDentroDeTag(buffer, "tr");
+    /* while (fgets(buffer, sizeof(buffer), source) != NULL) {
         row = strstr(buffer, ROW_TOKEN);
         if(row != NULL) {
             while ( ( token = strsepm( &row , NAME_TOKEN ) ) != NULL ) {
@@ -51,11 +53,10 @@ void extractData() {
                 printf("SPECIE NAME = %s\n", species[amountOfSpecies - 1].name);
             }
 
-            /** Agrando el array de Species **/
             amountOfSpecies++;
             species = (specie_t*) realloc(species, sizeof(specie_t) * amountOfSpecies);
         }
-    }
+    }*/
 }
 
 void printMainMenu() {
