@@ -11,12 +11,6 @@
 #define ERROR_OPTION    9
 #define MAX_COLUMN 17
 
-FILE *source;
-char *buffer;
-row_t table[65];
-
-typedef char* row_t[16];
-
 typedef enum{
     ESPECIE,
     VTO,
@@ -34,6 +28,14 @@ typedef enum{
     OPERACION,
     HORA
 } column_t;
+
+typedef char *row_t[16];
+
+FILE *source;
+char *buffer;
+row_t table[65];
+
+
 
 void extractData() {
     int seek_fila = 0;
@@ -77,14 +79,50 @@ void printMainMenu() {
     puts("3- Listar las especies cuyo porcentaje de variacion es negativo en una tabla HTML\n");
 }
 
+void replaceCharacter(char** st, char replaced, char replace){
+    for(int i=0; i< strlen(*st); i++){
+        if((*st)[i] == replaced){
+            (*st)[i] = replace;
+        }
+    }
+}
+
+bool tableCondition(char* st_compra, char* st_venta, char* st_apertura){
+    char *ptr;
+    
+    replaceCharacter(&st_compra,',','.');
+    replaceCharacter(&st_venta,',','.');
+    replaceCharacter(&st_apertura,',','.');
+    
+    double compra = strtod(st_compra, &ptr);
+    double venta = strtod(st_venta, &ptr);
+    double apertura = strtod(st_apertura, &ptr);
+
+    return ((compra < apertura) && (venta < apertura));
+}
+
 void getSpeciesWithNegativePercentage(bool shouldPrintAsHTML) {
     if(shouldPrintAsHTML) {
-        //TODO
+        FILE *fp;
+        fp = fopen("TP2.html", "w+");
+        fprintf(fp,"<!doctype html>\n<html>\n<body>\n<table>\n");
+        for(int i=0; i<65; i++){
+            if(table[i][VARIACION][0] == '-'){
+                fprintf(fp,"<tr>\n\t");
+                if(tableCondition(table[i][COMPRA], table[i][VENTA], table[i][APERTURA])){
+                    fprintf(fp,"<td style=\"color:green\">%s</td>",table[i][ESPECIE]);
+                }else{
+                    fprintf(fp,"<td>%s</td>",table[i][ESPECIE]);
+                }
+                fprintf(fp,"</tr>\n");
+            }
+        }
+        fprintf(fp,"</table>\n</body>\n</html>\n");
+        fclose(fp);
     } else {
         puts("Especies con variacion negativa:\n");
         for(int i=0; i<65; i++){
             if(table[i][VARIACION][0] == '-'){
-                printf("\t\t\t");
                 puts(table[i][ESPECIE]);
             }
         }
