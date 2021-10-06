@@ -15,11 +15,6 @@ FILE *source;
 char *buffer;
 row_t table[65];
 
-typedef enum {
-    OPEN,
-    CLOSE
-} tag_position;
-
 typedef char* row_t[16];
 
 typedef enum{
@@ -46,7 +41,6 @@ void extractData() {
     int column = 0;
     int rowAmount = 0;
     
-    char* buffer = readFile("SSL-TP2.html");
     char* htmlRow = readDataFromTag(buffer,"tr",&seek_fila);
     char* delta;
     bool emptyRow = true;
@@ -84,6 +78,18 @@ void printMainMenu() {
 }
 
 void getSpeciesWithNegativePercentage(bool shouldPrintAsHTML) {
+    if(shouldPrintAsHTML) {
+        //TODO
+    } else {
+        puts("Especies con variacion negativa:\n");
+        for(int i=0; i<65; i++){
+            if(table[i][VARIACION][0] == '-'){
+                printf("\t\t\t");
+                puts(table[i][ESPECIE]);
+            }
+        }
+        puts("");
+    }
 }
 
 void getBuyAndSellQuotesAndPrintAsCSV() {
