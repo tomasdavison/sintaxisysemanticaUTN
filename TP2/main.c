@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include "string_aux.h"
 #include "html_aux.h"
 
 #define MAIN_MENU       0
@@ -10,53 +9,71 @@
 #define SECOND_OPTION   2
 #define THIRD_OPTION    3
 #define ERROR_OPTION    9
+#define MAX_COLUMN 17
 
 FILE *source;
-char buffer[1048576];
+char *buffer;
+row_t table[65];
 
-typedef struct {
-    char name[5];
-    char expiration[4];
-    int nominal;
-    float buyValue;
-    float sellValue;
-    int nominalAmount;
-    float lastPrice;
-    float variation;
-    float openingValue;
-    float minValue;
-    float maxValue;
-    float lastClosingValue;
-    float volume;
-    float amount;
-    int operation;
-    char hour[8];
-} specie_t;
-specie_t* species;
+typedef enum {
+    OPEN,
+    CLOSE
+} tag_position;
+
+typedef char* row_t[16];
+
+typedef enum{
+    ESPECIE,
+    VTO,
+    CANT_NOMINAL_1,
+    COMPRA,
+    VENTA,
+    CANT_NOMINAL_2,
+    ULTIMO,
+    VARIACION,
+    APERTURA,
+    MAX,MIN,
+    CIERRE_ANTERIOR,
+    VOLUMEN,
+    MONTO,
+    OPERACION,
+    HORA
+} column_t;
 
 void extractData() {
-    char* token;
-    char* row;
-    int amountOfSpecies = 1;
-    const char ROW_TOKEN[] = "<tr id";
-    const char NAME_TOKEN[] = "link('";
-    const char TD_TOKEN[] = "/td><td";
+    int seek_fila = 0;
+    int seek_column = 0;
+    int column = 0;
+    int rowAmount = 0;
+    
+    char* buffer = readFile("SSL-TP2.html");
+    char* htmlRow = readDataFromTag(buffer,"tr",&seek_fila);
+    char* delta;
+    bool emptyRow = true;
 
-    //species = (specie_t *) malloc(sizeof(specie_t));
-    char* fila = obtenerDataDentroDeTag(buffer, "tr");
-    /* while (fgets(buffer, sizeof(buffer), source) != NULL) {
-        row = strstr(buffer, ROW_TOKEN);
-        if(row != NULL) {
-            while ( ( token = strsepm( &row , NAME_TOKEN ) ) != NULL ) {
-                strncpy(species[amountOfSpecies - 1].name, token, 4);
-                species[amountOfSpecies - 1].name[4] = '\n';
-                printf("SPECIE NAME = %s\n", species[amountOfSpecies - 1].name);
+    while(htmlRow != NULL){
+        seek_column = 0;
+        column = 0;
+        char* data = readDataFromTag(htmlRow, "td", &seek_column);
+        while(data!= NULL){
+            emptyRow = false;
+            if(strstr(data, "span") != NULL){
+                delta = readDataFromTag(data, "span", NULL);
+                data = (char*) realloc(data, strlen(delta));
+                strcpy(data,delta);
             }
 
-            amountOfSpecies++;
-            species = (specie_t*) realloc(species, sizeof(specie_t) * amountOfSpecies);
+            table[rowAmount][column] = (char*) calloc(strlen(data) +1 , sizeof(char));
+            memcpy(table[rowAmount][column], data, strlen(data));
+
+            data = readDataFromTag(&(htmlRow[seek_column]), "td", &seek_column);
+            column++;   
         }
-    }*/
+
+        htmlRow = readDataFromTag(&(buffer[seek_fila]), "tr",&seek_fila);
+        if(!emptyRow)
+            rowAmount++;
+    }
 }
 
 void printMainMenu() {
@@ -67,27 +84,40 @@ void printMainMenu() {
 }
 
 void getSpeciesWithNegativePercentage(bool shouldPrintAsHTML) {
-    extractData();
 }
 
 void getBuyAndSellQuotesAndPrintAsCSV() {
 }
 
+char* openFileAndLoadBuffer(char* filename) {
+    FILE* file = fopen(filename,"r");
+    if(file == NULL){
+        return NULL;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long int size = ftell(file);
+    rewind(file);
+
+    char* content = calloc(size + 1, 1);
+
+    fread(content,1,size,file);
+    fclose(file);
+
+    return content;
+}
+
+void initialize() {
+    buffer = openFileAndLoadBuffer("SSL-TP2.html");
+    extractData();
+}
 
 int main(void) {
     int option;
     int state = MAIN_MENU;
     
     puts("---          Bienvenido          ---");
-    
-    source = fopen("SSL-TP2.html", "r");
-    if(source == NULL) {
-        printf("Error al intentar abrir el archivo.");
-        return -1;
-    } else {
-        printf("El archivo se pudo abrir correctamente!\n\n");
-    }
-    
+    initialize();
     /* Máquina de estados */
     while(1) {
         switch(state) {
@@ -129,6 +159,5 @@ int main(void) {
         }
     }
 
-    free(species);
     return 0;
 }

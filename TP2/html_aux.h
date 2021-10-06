@@ -1,3 +1,4 @@
 #include <string.h>
+#include <stdlib.h>
 
-char* obtenerDataDentroDeTag(char* buffer, char* tag);
+char* readDataFromTag(char* buffer, char* tag_name, int* seek);
