@@ -130,7 +130,40 @@ void getSpeciesWithNegativePercentage(bool shouldPrintAsHTML) {
     }
 }
 
+bool shouldAddToCSV(column_t column){
+    switch(column){
+        case ESPECIE:
+        case COMPRA:
+        case VENTA:
+        case APERTURA:
+        case MAX:
+        case MIN:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void getBuyAndSellQuotesAndPrintAsCSV() {
+    FILE *fp;
+
+    puts("Creando archivo CSV");
+    fp = fopen("TP2.csv", "w+");
+    fprintf(fp, "Especie;\tPrecio de compra;\tPrecio de venta;\tApertura;\tPrecio Máximo;\tPrecio Mínimo\n");
+
+    for(int i=0; i < 65; i++){
+        for(int j=0; j < 16; j++){
+            if(shouldAddToCSV(j)){
+                if(j==MIN) {
+                    fprintf(fp,"%s", table[i][j]);
+                } else {
+                    fprintf(fp,"%s;\t\t\t", table[i][j]);
+                }
+            }
+        }
+        fprintf(fp,"\n");
+    }
+    fclose(fp);
 }
 
 char* openFileAndLoadBuffer(char* filename) {
