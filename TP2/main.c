@@ -110,9 +110,9 @@ void getSpeciesWithNegativePercentage(bool shouldPrintAsHTML) {
             if(table[i][VARIACION][0] == '-'){
                 fprintf(fp,"<tr>\n\t");
                 if(tableCondition(table[i][COMPRA], table[i][VENTA], table[i][APERTURA])){
-                    fprintf(fp,"<td style=\"color:green\">%s</td>",table[i][ESPECIE]);
-                }else{
-                    fprintf(fp,"<td>%s</td>",table[i][ESPECIE]);
+                    fprintf(fp,"<td style=\"background-color:green; border: 1px solid black;\">%s</td>",table[i][ESPECIE]);
+                } else {
+                    fprintf(fp,"<td style=\"background-color:white; border: 1px solid black;\">%s</td>",table[i][ESPECIE]);
                 }
                 fprintf(fp,"</tr>\n");
             }
